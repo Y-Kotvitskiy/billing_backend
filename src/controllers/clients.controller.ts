@@ -1,32 +1,34 @@
 // backend/src/controllers/clients.controller.ts
 import { FastifyRequest, FastifyReply } from "fastify";
 import { ClientsService } from "../services/clients.service.js";
-import { z } from "zod";
-
-const createClientSchema = z.object({
-  name: z.string().min(2, "Имя должно быть не менее 2 символов"),
-  phone: z.string().min(10, "Некорректный номер телефона"),
-  password: z.string().min(6, "Пароль должен содержать минимум 6 символов"),
-});
-
-const updateClientSchema = z.object({
-  name: z.string().min(2).optional(),
-  phone: z.string().min(10).optional(),
-  is_active: z.boolean().optional(),
-});
+import {
+  createClientSchema,
+  updateClientSchema,
+  ClientIdParams,
+} from "../models/client.model.js";
 
 export class ClientsController {
+  static async getMyProfile(req: FastifyRequest, reply: FastifyReply) {
+    const user = req.user;
+
+    const client = await ClientsService.getById(user.id);
+    if (!client) {
+      return reply.status(404).send({ error: "Client not found" });
+    }
+
+    return reply.send(client);
+  }
+
   static async getAll(_req: FastifyRequest, reply: FastifyReply) {
     const clients = await ClientsService.getAll();
     return reply.send(clients);
   }
 
   static async getById(
-    req: FastifyRequest<{ Params: { id: string } }>,
+    req: FastifyRequest<{ Params: ClientIdParams }>,
     reply: FastifyReply,
   ) {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return reply.status(400).send({ error: "Invalid ID" });
+    const id = req.params.id;
 
     const client = await ClientsService.getById(id);
     if (!client) return reply.status(404).send({ error: "Client not found" });
@@ -52,12 +54,11 @@ export class ClientsController {
   }
 
   static async update(
-    req: FastifyRequest<{ Params: { id: string } }>,
+    req: FastifyRequest<{ Params: ClientIdParams }>,
     reply: FastifyReply,
   ) {
     try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) return reply.status(400).send({ error: "Invalid ID" });
+      const id = req.params.id;
 
       const validatedData = updateClientSchema.parse(req.body);
       const updated = await ClientsService.update(id, validatedData);
@@ -78,11 +79,10 @@ export class ClientsController {
   }
 
   static async delete(
-    req: FastifyRequest<{ Params: { id: string } }>,
+    req: FastifyRequest<{ Params: ClientIdParams }>,
     reply: FastifyReply,
   ) {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return reply.status(400).send({ error: "Invalid ID" });
+    const id = req.params.id;
 
     await ClientsService.delete(id);
     return reply.send({ message: "Client deleted successfully" });

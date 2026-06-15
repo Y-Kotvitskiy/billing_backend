@@ -2,14 +2,17 @@
 import fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import cookie from "@fastify/cookie";
 import dotenv from "dotenv";
 import DbService from "./services/db.service.js";
+import { authPlugin } from "./middleware/auth.middleware.js";
 import { clientsRoutes } from "./routes/clients.routes.js";
+import { authRoutes } from "./routes/auth.routes.js";
 
 dotenv.config();
 
 const server = fastify({
-  logger: true,
+  // logger: true,
 });
 
 // Регистрируем плагины
@@ -38,6 +41,9 @@ server.get("/health", async () => {
   }
 });
 
+await server.register(cookie);
+await server.register(authRoutes, { prefix: "/api/v1" });
+await server.register(authPlugin); // ← JWT плагин
 await server.register(clientsRoutes, { prefix: "/api/v1" });
 
 const start = async () => {
