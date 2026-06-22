@@ -35,6 +35,22 @@ export class AuthService {
         role: "admin",
         is_active: true,
       };
+
+      // user = {
+      //   id: 2,
+      //   name: "Peter",
+      //   phone: "123",
+      //   role: "client",
+      //   is_active: true,
+      // };
+
+      // user = {
+      //   id: 2,
+      //   name: "Петр",
+      //   phone: "123",
+      //   role: "client",
+      //   is_active: true,
+      // };
     }
     // === ERP ===
     else if (phone === process.env.ERP_PHONE) {
@@ -54,8 +70,8 @@ export class AuthService {
     else {
       const client = await DbService.queryOne<ClientUser>(
         `
-        SELECT id, name, phone, password, is_active, role 
-        FROM clients 
+        SELECT id, name, phone, password, is_active
+        FROM clients
         WHERE phone = ?
       `,
         [phone],
@@ -68,7 +84,7 @@ export class AuthService {
       if (!isPasswordValid)
         throw new Error("Невірний номер телефону або пароль");
 
-      user = client;
+      user = { ...client, role: "client" };
     }
 
     if (!user) throw new Error("Невірний логін або пароль");

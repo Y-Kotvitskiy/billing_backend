@@ -8,8 +8,12 @@ import DbService from "./services/db.service.js";
 import { authPlugin } from "./middleware/auth.middleware.js";
 import { clientsRoutes } from "./routes/clients.routes.js";
 import { authRoutes } from "./routes/auth.routes.js";
+import { contractsRoutes } from "./routes/contracts.routes.js";
+import { paymentsRoutes } from "./routes/payments.routes.js";
 
 dotenv.config();
+
+const URL_API = "/api";
 
 const server = fastify({
   // logger: true,
@@ -42,9 +46,11 @@ server.get("/health", async () => {
 });
 
 await server.register(cookie);
-await server.register(authRoutes, { prefix: "/api/v1" });
+await server.register(authRoutes, { prefix: URL_API });
 await server.register(authPlugin); // ← JWT плагин
-await server.register(clientsRoutes, { prefix: "/api/v1" });
+await server.register(clientsRoutes, { prefix: URL_API });
+await server.register(contractsRoutes, { prefix: URL_API });
+await server.register(paymentsRoutes, { prefix: URL_API });
 
 const start = async () => {
   try {

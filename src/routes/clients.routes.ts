@@ -3,7 +3,6 @@ import { FastifyInstance } from "fastify";
 import { ClientsController } from "../controllers/clients.controller.js";
 import { hasRole } from "../middleware/roles.middleware.js";
 import { clientIdSchema, ClientIdParams } from "../models/client.model.js";
-import { zodToJsonSchema } from "zod-to-json-schema";
 
 export async function clientsRoutes(fastify: FastifyInstance) {
   // ==================== Клиентские маршруты ====================

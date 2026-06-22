@@ -1,0 +1,4 @@
+{
+  "language": "en,uk",
+  "ignorePaths": ["**/node_modules/**"]
+}

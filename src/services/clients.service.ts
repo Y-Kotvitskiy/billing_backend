@@ -14,7 +14,7 @@ export class ClientsService {
   static async getById(id: number) {
     return DbService.queryOne(
       `
-      SELECT id, name, phone, is_active, created_at, updated_at 
+      SELECT id, name, phone, 'client' as role,  created_at, updated_at 
       FROM clients 
       WHERE id = ?
     `,

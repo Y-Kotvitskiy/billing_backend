@@ -45,7 +45,7 @@ export interface ServiceUser {
   id: number;
   name: string;
   phone: string;
-  role: "admin" | "erp";
+  role: "admin" | "erp" | "client";
   is_active: boolean;
   // password не нужен, т.к. проверяется раньше
 }
