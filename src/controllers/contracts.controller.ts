@@ -60,10 +60,13 @@ export class ContractsController {
     req: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ): Promise<Contract> {
-    const contractId = parseInt(req.params.id);
-    (req as any).contractId = contractId;
+    // Reject if filters exist in query
+    const hasUnexpectedParams =
+      Object.keys(req.query as Record<string, any>).length > 0;
 
-    const contract = await ContractsService.getById(req);
+    const contractId = parseInt(req.params.id);
+
+    const contract = await ContractsService.getById(contractId);
     if (!contract)
       return reply
         .status(404)
@@ -75,6 +78,16 @@ export class ContractsController {
     req: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
   ) {
+    // Reject if filters exist in query
+    const hasUnexpectedParams =
+      Object.keys(req.query as Record<string, any>).length > 0;
+
+    if (hasUnexpectedParams) {
+      return reply
+        .status(400)
+        .send({ error: "No query filters allowed for single resource lookup" });
+    }
+
     const contractId = parseInt(req.params.id);
     (req as any).contractId = contractId;
 
@@ -86,7 +99,7 @@ export class ContractsController {
 
     (req as any).enforcedClientId = clientId;
 
-    const contract = await ContractsService.getById(req);
+    const contract = await ContractsService.getById(contractId, clientId);
     if (!contract)
       return reply
         .status(404)

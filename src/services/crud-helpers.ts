@@ -46,7 +46,7 @@ export function buildWhereClause(
   return { whereClause, params };
 }
 
-export async function getListBase({
+export async function getListBase<T>({
   select = "*",
   tableName,
   whereClause,
@@ -70,7 +70,7 @@ export async function getListBase({
     LIMIT ? OFFSET ?
   `;
 
-  const data = await DbService.queryRows(sql, [
+  const data: T[] = await DbService.queryRows(sql, [
     ...params,
     String(limit),
     String(offset),
@@ -83,21 +83,4 @@ export async function getListBase({
     data,
     total: Number(totalResult?.total || 0),
   };
-}
-
-export async function getOneBase({
-  select = "*",
-  tableName,
-  whereClause,
-  params,
-}: {
-  select?: string;
-  tableName: string;
-  whereClause: string;
-  params: any[];
-}) {
-  const countSql = `SELECT ${select} FROM ${tableName} ${whereClause}`;
-  const data = await DbService.queryOne(countSql, params);
-
-  return data;
 }

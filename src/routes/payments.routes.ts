@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import type { ZodTypeAny } from "zod";
 import { PaymentsController } from "../controllers/payments.controller.js";
 import {
   Payment,
@@ -6,24 +7,27 @@ import {
   paymentResponseSchema,
 } from "../models/payments.model.js";
 import { hasRole } from "../middleware/roles.middleware.js";
+import { zodToJsonSchema } from "zod-to-json-schema";
 
-export type PaymentListResponse = {
-  data: Payment[];
-  total: number;
-};
+const paymentResponseJsonSchema = zodToJsonSchema(
+  paymentResponseSchema as ZodTypeAny,
+);
+
+const paymentResponseListJsonSchema = zodToJsonSchema(
+  paymentListResponseSchema as ZodTypeAny,
+);
 
 export async function paymentsRoutes(fastify: FastifyInstance) {
-  // GET /payments?_page=1&_limit=10&_sort=created_at&_order=DESC
   fastify.get<{
     Querystring: Record<string, any>; // або створити окремий тип
-    Reply: PaymentListResponse;
+    Reply: Payment[];
   }>(
     "/payments",
     {
       preHandler: [fastify.authenticate, hasRole(["admin"])],
       schema: {
         response: {
-          200: paymentListResponseSchema,
+          200: paymentListResponseSchema as any,
         },
       },
     },
@@ -39,7 +43,7 @@ export async function paymentsRoutes(fastify: FastifyInstance) {
       preHandler: [fastify.authenticate, hasRole(["admin", "client"])],
       schema: {
         response: {
-          //          200: paymentResponseSchema,
+          200: paymentResponseJsonSchema as any,
         },
       },
     },
@@ -48,14 +52,14 @@ export async function paymentsRoutes(fastify: FastifyInstance) {
 
   fastify.get<{
     Querystring: Record<string, any>; // або створити окремий тип
-    Reply: PaymentListResponse;
+    Reply: Payment[];
   }>(
     "/payments/me",
     {
       preHandler: [fastify.authenticate, hasRole(["client"])],
       schema: {
         response: {
-          //          200: paymentResponseSchema,
+          200: paymentResponseListJsonSchema as any,
         },
       },
     },
